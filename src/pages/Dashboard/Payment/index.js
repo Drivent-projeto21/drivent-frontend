@@ -1,3 +1,5 @@
-export default function Payment() {
-  return 'Pagamento: Em breve!';
+import Payment from '../../../components/Payment';
+
+export default function PaymentPage() {
+  return <Payment />;
 }
