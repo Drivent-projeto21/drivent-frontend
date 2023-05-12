@@ -3,16 +3,22 @@ import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import getEnrollment from '../../hooks/api/useEnrollment';
 import UserWithoutEnrollment from './UserWithoutEnrollment';
+import useTicket from '../../hooks/api/useTicket';
 import TickestType from './TicketsType';
+import { useState } from 'react';
+import TicketAndPayment from './TicketAndPayment';
 
 export default function Payment() {
   const { enrollment } = getEnrollment();
+  const { ticket, ticketLoading } = useTicket();
+  const [ticketReserved, setTicketReserved] = useState(false);
   return (
     <>
       <StyledTypography variant="h4">Ingresso e pagamento</StyledTypography>
       <MainScr>
-        {enrollment ? (
-          <TickestType />
+        {enrollment ? 
+        ticketReserved || (ticket && !ticketLoading) ? <TicketAndPayment /> : (
+          <TickestType setTicketReserved={setTicketReserved}/>
         ) : (
           <NotEnrollScr>
             <UserWithoutEnrollment />
