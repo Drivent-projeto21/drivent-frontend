@@ -7,9 +7,9 @@ export default function SelectHotel({ item }) {
       <img src={item.image} alt='logo' />
       <h2 variant="h6">{item.name}</h2>
       <h3 variant="h1">Tipos de acomodação:</h3>
-      <h4 variant="subtitle2">Single e Double</h4>
+      <h4 variant="subtitle2">Inserir info dos tipos de quarto</h4>
       <h3 variant="subtitle2">Vagas disponíveis:</h3>
-      <h4 variant="subtitle2">7</h4>
+      <h4 variant="subtitle2">Nº total de vagas disponiveis</h4>
 
     </StyledHotel>
   );
@@ -17,7 +17,7 @@ export default function SelectHotel({ item }) {
 
 const StyledHotel = styled.div`
 width: 196px;
-height:264px;
+min-height:300px;
 background: #EBEBEB;
 border-radius: 10px;
 margin-top:18px ;
