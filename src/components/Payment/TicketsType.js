@@ -1,25 +1,28 @@
+/* eslint-disable indent */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Typography, Button } from '@material-ui/core';
-import useTicketType from '../../hooks/api/useTickets';
+import useTicketType from '../../hooks/api/useTicketTypes';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import useSaveTicket from '../../hooks/api/useSaveTicket';
 
-export default function TicketsType() {
+export default function TicketsType( { setTicketReserved } ) {
   const { ticketType } = useTicketType();
-  const [selectedTicketId, setSelectedTicketId] = useState(null);
-  const [includeHotel, setIncludeHotel] = useState(false);
-  const [total, setTotal] = useState(0);
+  const [chosenTicket, setChosenTicket] = useState(null);
+  const [choseAccomodation, setChoseAcommodation] = useState(false);
+  const [choseOnline, setChoseOnline] = useState(false);
+  const { saveTicket, saveTicketLoading } = useSaveTicket();
 
-  function handleTicketSelect(ticketId) {
-    setSelectedTicketId(ticketId);
-  }
-
-  function handleProceed() {
-    const selectedTicket = ticketType.find((ticket) => ticket.id === selectedTicketId);
-    const ticketPrice = selectedTicket ? selectedTicket.price : 0;
-    const hotelPrice = includeHotel ? 100 : 0;
-    const totalPrice = ticketPrice + hotelPrice;
-    setTotal(totalPrice);
+  async function handleProceed() {
+    try {
+      await saveTicket({ ticketTypeId: chosenTicket.id });
+      setTicketReserved(true);
+      toast('Ingresso reservado com sucesso!');
+    } catch (error) {
+      toast('Não foi possível reservar seu ingresso!');
+    }
   }
 
   return (
@@ -31,74 +34,102 @@ export default function TicketsType() {
             {ticketType
               .filter((ticket) => ticket.includesHotel === false)
               .map((ticket) => (
-                <TicketBox key={ticket.id} ticket={ticket} onSelect={handleTicketSelect} />
+                <ModalityBox key={ticket.id} ticket={ticket} setChosenTicket={setChosenTicket}
+                chosenTicket={chosenTicket} setChoseOnline={setChoseOnline}/>
               ))}
           </>
         ) : (
-          <span>Nada</span>
+          ''
         )}
       </BoxTicket>
-      {selectedTicketId && (
+
+      { chosenTicket && !chosenTicket.isRemote ? 
         <>
           <StyledTypography variant="colorTextSecondary">
             Ótimo! Agora escolha a modalidade de hospedagem
           </StyledTypography>
           <BoxTicket>
-            {ticketType
-              .filter((ticket) => ticket.includesHotel === true)
+            {ticketType?.length > 0 &&
+              ticketType.filter((ticket) => ticket.isRemote === false)
               .map((ticket) => (
-                <TicketBox
+                <AccomodationBox
                   key={ticket.id}
-                  ticket={{ ...ticket, name: 'Com Hotel', price: '350' }}
-                  onSelect={handleTicketSelect}
+                  ticket={ticket}
+                  setChosenTicket={setChosenTicket}
+                  chosenTicket={chosenTicket}
+                  setChoseAcommodation={setChoseAcommodation}
+                  choseAccomodation={choseAccomodation}
                 />
               ))}
-            {ticketType?.length > 0 ? (
-              <>
-                {ticketType
-                  .filter((ticket) => ticket.isRemote === false && ticket.includesHotel === false)
-                  .map((ticket) => (
-                    <TicketBox
-                      key={ticket.id}
-                      ticket={{ ...ticket, name: 'Sem Hotel', price: '0' }}
-                      onSelect={handleTicketSelect}
-                    />
-                  ))}
-              </>
-            ) : (
-              <span>Nada</span>
-            )}
           </BoxTicket>
-          <TotalSection>
-            <StyledTypography variant="colorTextSecondary">
-              Fechado! O total ficou em R$ {total}. Agora é só confirmar:
-            </StyledTypography>
-            <ButtonSection>
-              <Link to="">
-                <ConfirmButton variant="contained" color="primary" onClick={handleProceed}>
-                  RESERVAR INGRESSO
-                </ConfirmButton>
-              </Link>
-            </ButtonSection>
-          </TotalSection>
         </>
-      )}
+        : ''}
+        {chosenTicket && (choseAccomodation || choseOnline) ? 
+          <TotalSection>
+          <StyledTypography variant="colorTextSecondary">
+            Fechado! O total ficou em R$ {chosenTicket.price}. Agora é só confirmar:
+          </StyledTypography>
+          <ButtonSection>
+            <Link to="">
+              <ConfirmButton disabled={saveTicketLoading} variant="contained" color="primary" onClick={handleProceed}>
+                RESERVAR INGRESSO
+              </ConfirmButton>
+            </Link>
+          </ButtonSection>
+        </TotalSection>
+        : ''}
+
     </>
   );
 }
 
-function TicketBox({ ticket, onSelect }) {
+function ModalityBox({ ticket, setChosenTicket, chosenTicket, setChoseOnline }) {
   const [selected, setSelected] = useState(false);
 
   function select() {
-    setSelected(true);
-    onSelect(ticket.id);
+    if (selected) {
+      setSelected(false);
+      setChosenTicket(null);
+      if (ticket.isRemote) setChoseOnline(false);
+      return;
+    };
+    if (!chosenTicket) {
+      setSelected(true);
+      setChosenTicket(ticket);
+      if (ticket.isRemote) setChoseOnline(true);
+    }
   }
 
   return (
-    <ChoiceBox className={selected ? 'selected' : ''} onClick={select}>
+    <ChoiceBox selected={selected} onClick={select}>
       <TicketTitle>{ticket.name}</TicketTitle>
-      <TicketPrice>R$ {ticket.price}</TicketPrice>
+      <TicketPrice>R$ ${ticket.price}</TicketPrice>
+    </ChoiceBox>
+  );
+}
+
+function AccomodationBox({ ticket, setChosenTicket, choseAccomodation, setChoseAcommodation }) {
+  const [selected, setSelected] = useState(false);
+
+  useEffect(() => { setChoseAcommodation(false); setSelected(false); }, []);
+
+  function select() {
+    if (selected) {
+      setSelected(false);
+      setChoseAcommodation(false);
+      return;
+    };
+    if (!choseAccomodation) {
+      setSelected(true);
+      setChosenTicket(ticket);
+      setChoseAcommodation(true);
+    }
+  }
+
+  return (
+    <ChoiceBox selected={selected} onClick={select}>
+      <TicketTitle>{ticket.includesHotel ? 'Com Hotel' : 'Sem Hotel'}</TicketTitle>
+      <TicketPrice>{ticket.includesHotel ? '+ R$ 350' : '+ R$ 0'}</TicketPrice>
     </ChoiceBox>
   );
 }
@@ -128,14 +159,10 @@ const ChoiceBox = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid #cecece;
   border-radius: 20px;
   margin: 20px 30px 40px 0;
-
-  &.selected {
-    background-color: #ffeed2;
-    border: none;
-  }
+  background-color: ${props => props.selected ? '#ffeed2' : '#ffffff'};
+  border: ${props => props.selected ? 'none' : '1px solid #cecece'};
 `;
 
 const TicketPrice = styled(Typography)`
