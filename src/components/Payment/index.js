@@ -11,7 +11,7 @@ export default function Payment() {
     <>
       <StyledTypography variant="h4">Ingresso e pagamento</StyledTypography>
       <MainScr>
-        {enrollment ? (
+        {enrollment ? ( 
           <TickestType />
         ) : (
           <NotEnrollScr>
