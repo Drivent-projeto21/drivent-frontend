@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Typography, Button } from '@material-ui/core';
 import useTicketType from '../../hooks/api/useTickets';
@@ -73,9 +74,11 @@ export default function TicketsType() {
               Fechado! O total ficou em R$ {total}. Agora é só confirmar:
             </StyledTypography>
             <ButtonSection>
-              <ConfirmButton variant="contained" color="primary" onClick={handleProceed}>
-                RESERVAR INGRESSO
-              </ConfirmButton>
+              <Link to="">
+                <ConfirmButton variant="contained" color="primary" onClick={handleProceed}>
+                  RESERVAR INGRESSO
+                </ConfirmButton>
+              </Link>
             </ButtonSection>
           </TotalSection>
         </>
@@ -93,7 +96,7 @@ function TicketBox({ ticket, onSelect }) {
   }
 
   return (
-    <ChoiceBox selected={selected} onClick={select}>
+    <ChoiceBox className={selected ? 'selected' : ''} onClick={select}>
       <TicketTitle>{ticket.name}</TicketTitle>
       <TicketPrice>R$ {ticket.price}</TicketPrice>
     </ChoiceBox>
@@ -107,7 +110,7 @@ const ConfirmButton = styled.button`
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
   border: none;
   border-radius: 4px;
-
+  cursor: pointer;
   font-size: 14px;
 `;
 
@@ -128,6 +131,11 @@ const ChoiceBox = styled.div`
   border: 1px solid #cecece;
   border-radius: 20px;
   margin: 20px 30px 40px 0;
+
+  &.selected {
+    background-color: #ffeed2;
+    border: none;
+  }
 `;
 
 const TicketPrice = styled(Typography)`
