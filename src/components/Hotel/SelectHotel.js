@@ -1,4 +1,3 @@
-import logo from '../../assets/images/drivent.png';
 import styled from 'styled-components';
 
 export default function SelectHotel({ item }) {
