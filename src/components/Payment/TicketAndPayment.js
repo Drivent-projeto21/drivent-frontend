@@ -4,7 +4,6 @@ import useTicket from '../../hooks/api/useTicket';
 import CreditCardForm from './CreditCardForm';
 import styled from 'styled-components';
 import TicketInfo from './TicketInfo';
-import usePayment from '../../hooks/api/usePayment';
 import { AiFillCheckCircle } from 'react-icons/ai';
 
 export default function TicketAndPayment() { 
