@@ -14,4 +14,9 @@ const VacancyFree = styled(IoPersonOutline)`
   font-size: 27px;
 `;
 
-export { VacancyOccupied, VacancyFree, VacancySelected };
+const FullRoom = styled(IoPerson)`
+  color: #8C8C8C;
+  font-size: 27px;
+`;
+
+export { VacancyOccupied, VacancyFree, VacancySelected, FullRoom };

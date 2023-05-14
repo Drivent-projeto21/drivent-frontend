@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import getRooms from '../../hooks/api/useRoom';
 import getBookings from '../../hooks/api/useBooking';
-import { useState, useContext } from 'react';
 
 function getAccommodationTypes(rooms) {
   let accomodations = [];
@@ -50,6 +49,7 @@ export default function SelectHotel({ item, hotelId, setBookings, setSelectedHot
   if (bookings) {
     params = getAvailability(bookings);
   }
+  
   return (
     <>
       <StyledHotel onClick={() => {
@@ -74,9 +74,9 @@ export default function SelectHotel({ item, hotelId, setBookings, setSelectedHot
   );
 };
 
-const StyledHotel = styled.div`
+export const StyledHotel = styled.div`
 width: 196px;
-min-height:300px;
+min-height:200px;
 background-color: ${({ selectedHotel, hotelId }) => (selectedHotel===hotelId ? '#FFEED2' : ' #EBEBEB')};
 border-radius: 10px;
 margin-top:18px ;

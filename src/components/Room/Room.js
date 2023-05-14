@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { VacancyFree, VacancyOccupied, VacancySelected } from './Icons';
+import { FullRoom, VacancyFree, VacancyOccupied, VacancySelected } from './Icons';
 
-function renderIcons(item) {
+function renderIcons(item, selectedRoom, roomId) {
   let icons = [];
   let booked = item._count.Booking;
   let available = item.capacity - booked;
@@ -9,14 +9,21 @@ function renderIcons(item) {
 
   if (available === 0) {
     for (let i = 0; i < item.capacity; i++) {
-      icons.push(<VacancySelected></VacancySelected>);
+      icons.push(<FullRoom />);
     }
     locked = true;
     return { icons, locked };
   }
   if (available !== 0) {
-    for (let i = 0; i < available; i++) {
-      icons.push(<VacancyFree></VacancyFree>);
+    if (selectedRoom === roomId) {
+      for (let i = 0; i < available - 1; i++) {
+        icons.push(<VacancyFree></VacancyFree>);
+      }
+      icons.push(<VacancySelected />);
+    } else {
+      for (let i = 0; i < available; i++) {
+        icons.push(<VacancyFree></VacancyFree>);
+      }
     }
   }
   if (booked !== 0) {
@@ -27,10 +34,21 @@ function renderIcons(item) {
   return { icons, locked };
 }
 
-export default function Room({ item }) {
-  let { icons, locked } = renderIcons(item);
+export default function Room({ item, roomId, setSelectedRoom, selectedRoom }) {
+  let { icons, locked } = renderIcons(item, selectedRoom, roomId);
+
+  function selectRoom() {
+    if (locked) return;
+
+    if (selectedRoom === roomId) {
+      setSelectedRoom(0);
+    } else {
+      setSelectedRoom(roomId);
+    }
+  }
+
   return (
-    <StyledRoom locked={locked}>
+    <StyledRoom locked={locked} onClick={selectRoom} selectedRoom={selectedRoom} roomId={roomId}>
       <h1>{item.name}</h1>
       <div>
         {icons.map(icon => <>{icon}</>)}
@@ -50,7 +68,7 @@ const StyledRoom = styled.div`
   border: 1px solid #CECECE;
   border-radius: 10px;
   color: ${({ locked }) => (locked ? '#8C8C8C' : 'black')};
-  background-color: ${({ locked }) => (locked ? '#CECECE' : 'white')};
+  background-color: ${({ locked, selectedRoom, roomId }) => (locked ? '#CECECE' : selectedRoom === roomId ? '#FFEED2' : 'white')};
   h1{
     font-family: 'Roboto';
     font-style: normal;
