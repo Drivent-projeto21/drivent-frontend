@@ -9,10 +9,13 @@ export function BookedHotel({ finishedBooking }) {
     const room = finishedBooking.Room;
     const { bookings } = getBookings(hotel.id);
     const [filtered, setFiltered] = useState([]);
+    const [otherBookings, setOtherBookings] = useState(0);
 
     useEffect(() => {
         if (bookings) {
-            setFiltered(bookings?.filter((el) => el.id = room.id));
+            const filtered = bookings?.filter((el) => el.id = room.id);
+            setFiltered(filtered);
+            setOtherBookings(filtered[0]._count.Booking - 1);
         }
     }, [bookings]);
 
@@ -25,7 +28,7 @@ export function BookedHotel({ finishedBooking }) {
                     {room.name + ' '}
                     {room.capacity === 3 ? '(Triple)' : room.capacity === 2 ? '(Double)' : '(Single)'}</h4>
                 <h3 variant="subtitle2">Pessoas no seu quarto</h3>
-                <h4 variant="subtitle2">{filtered.length > 0 ? `Você e mais ${filtered[0]._count.Booking - 1}` : ''}</h4>
+                <h4 variant="subtitle2">{otherBookings > 0 ? `Você e mais ${otherBookings}` : 'Somente você'}</h4>
         </StyledHotel>
     );
 }
