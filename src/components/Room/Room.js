@@ -1,7 +1,9 @@
 import styled from 'styled-components';
+import { toast } from 'react-toastify';
 import { FullRoom, VacancyFree, VacancyOccupied, VacancySelected } from './Icons';
+import { useEffect, useState } from 'react';
 
-function renderIcons(item, selectedRoom, roomId) {
+function renderIcons(item, selectedRoom, roomId, sameRoom) {
   let icons = [];
   let booked = item._count.Booking;
   let available = item.capacity - booked;
@@ -28,18 +30,26 @@ function renderIcons(item, selectedRoom, roomId) {
   }
   if (booked !== 0) {
     for (let i = 0; i < booked; i++) {
-      icons.push(<VacancyOccupied></VacancyOccupied>);
+      icons.push(<VacancyOccupied same={sameRoom ? 1 : undefined}></VacancyOccupied>);
     }
   }
   return { icons, locked };
 }
 
-export default function Room({ item, roomId, setSelectedRoom, selectedRoom }) {
-  let { icons, locked } = renderIcons(item, selectedRoom, roomId);
+export default function Room({ item, roomId, setSelectedRoom, selectedRoom, finishedBooking, changeReservation }) {
+  const [sameRoom, setSameRoom] = useState(false);
+  let { icons, locked } = renderIcons(item, selectedRoom, roomId, sameRoom);
+
+  useEffect(() => {
+    if (changeReservation) {
+      if (finishedBooking.Room.id === roomId) return setSameRoom(true);
+    }
+  }, []);
 
   function selectRoom() {
     if (locked) return;
-
+    if (sameRoom) return (toast('Você já possui uma reserva neste quarto, escolha um diferente!'));
+    
     if (selectedRoom === roomId) {
       setSelectedRoom(0);
     } else {
@@ -48,7 +58,7 @@ export default function Room({ item, roomId, setSelectedRoom, selectedRoom }) {
   }
 
   return (
-    <StyledRoom locked={locked} onClick={selectRoom} selectedRoom={selectedRoom} roomId={roomId}>
+    <StyledRoom sameRoom={sameRoom} locked={locked} onClick={selectRoom} selectedRoom={selectedRoom} roomId={roomId}>
       <h1>{item.name}</h1>
       <div>
         {icons.map(icon => <>{icon}</>)}
@@ -68,7 +78,8 @@ const StyledRoom = styled.div`
   border: 1px solid #CECECE;
   border-radius: 10px;
   color: ${({ locked }) => (locked ? '#8C8C8C' : 'black')};
-  background-color: ${({ locked, selectedRoom, roomId }) => (locked ? '#CECECE' : selectedRoom === roomId ? '#FFEED2' : 'white')};
+  background-color: ${({ locked, selectedRoom, roomId, sameRoom }) => 
+    (locked || sameRoom? '#CECECE' : selectedRoom === roomId ? '#FFEED2' : 'white')};
   h1{
     font-family: 'Roboto';
     font-style: normal;
