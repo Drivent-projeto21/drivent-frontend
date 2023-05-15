@@ -2,7 +2,8 @@ import styled from 'styled-components';
 import { IoPersonOutline, IoPerson } from 'react-icons/io5';
 
 const VacancyOccupied = styled(IoPerson)`
-  color: black;
+  
+  color: ${props => props.same ? '#8C8C8C' : 'black'};
   font-size: 27px;
 `;
 const VacancySelected = styled(IoPerson)`

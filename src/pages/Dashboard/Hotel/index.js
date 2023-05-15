@@ -11,16 +11,19 @@ import useUserBooking from '../../../hooks/api/useUserBooking';
 import useSaveBooking from '../../../hooks/api/useSaveBooking';
 import { BookedHotel } from '../../../components/Hotel/BookedHotel';
 import { useEffect } from 'react';
+import useUpdateBooking from '../../../hooks/api/useUpdateBooking';
 
 export default function Hotel() {
   const { ticket } = getTicket();
   const { hotels, loadingHotels } = getHotels();
   const { userBooking, getUserBooking } = useUserBooking();
+  const { updateBooking } = useUpdateBooking();
   const { saveBooking } = useSaveBooking();
   const [selectedHotel, setSelectedHotel] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState(0);
   const [bookings, setBookings] = useState([]);
   const [finishedBooking, setFinishedBooking] = useState(null);
+  const [changeReservation, setChangeReservation] = useState(false);
 
   useEffect( async() => {
     if (userBooking) {
@@ -30,6 +33,20 @@ export default function Hotel() {
 
   async function handleBooking() {
     const body = { roomId: selectedRoom };
+    if (changeReservation) {
+      try {
+        await updateBooking(body, finishedBooking.id);
+        toast('Troca feita com sucesso!');
+        const updatedBooking = await getUserBooking();
+        setFinishedBooking(updatedBooking);
+        setChangeReservation(false);
+        return;
+      } catch (error) {
+        toast('Não foi possível efetuar a troca de quarto!');
+        return;
+      }
+    }
+
     try {
       await saveBooking(body);
       toast('Quarto reservado com sucesso!');
@@ -70,10 +87,15 @@ export default function Hotel() {
         </StyledHotelContainer>
       }
 
-      {finishedBooking ?
+      {finishedBooking && !changeReservation ?
         <>
           <BookedHotel finishedBooking={finishedBooking}/>
-          <BookRoomButton>TROCAR DE QUARTO</BookRoomButton>
+          <BookRoomButton 
+          onClick={() => {
+            setSelectedHotel(0);
+            setSelectedRoom(0);
+            setChangeReservation(true);
+          }}>TROCAR DE QUARTO</BookRoomButton>
         </>
       :
         <>
@@ -95,7 +117,9 @@ export default function Hotel() {
             <StyledTypography variant="colorTextSecondary">Ótima pedida! Agora escolha seu quarto:</StyledTypography>
             <StyledRoomsWrapper>
               {bookings.map(item => 
-              <Room item={ item } roomId={item.id} setSelectedRoom={setSelectedRoom} selectedRoom={selectedRoom} ></Room>)}
+              <Room 
+              item={ item } roomId={item.id} setSelectedRoom={setSelectedRoom} key={`room${item.id}`}
+              selectedRoom={selectedRoom} finishedBooking={finishedBooking} changeReservation={changeReservation} ></Room>)}
             </StyledRoomsWrapper>
           </StyledRoomsContainer>}
 
