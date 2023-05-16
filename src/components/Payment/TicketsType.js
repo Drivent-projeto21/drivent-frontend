@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Typography, Button } from '@material-ui/core';
@@ -7,6 +7,7 @@ import useTicketType from '../../hooks/api/useTicketTypes';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import useSaveTicket from '../../hooks/api/useSaveTicket';
+import TicketInfoContext from '../../contexts/TicketInfoContext';
 
 export default function TicketsType( { setTicketReserved } ) {
   const { ticketType } = useTicketType();
@@ -14,10 +15,12 @@ export default function TicketsType( { setTicketReserved } ) {
   const [choseAccomodation, setChoseAcommodation] = useState(false);
   const [choseOnline, setChoseOnline] = useState(false);
   const { saveTicket, saveTicketLoading } = useSaveTicket();
+  const { refreshTicket } = useContext(TicketInfoContext);
 
   async function handleProceed() {
     try {
       await saveTicket({ ticketTypeId: chosenTicket.id });
+      await refreshTicket();
       setTicketReserved(true);
       toast('Ingresso reservado com sucesso!');
     } catch (error) {

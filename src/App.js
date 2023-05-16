@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,6 +21,7 @@ import { EventInfoProvider } from './contexts/EventInfoContext';
 import { UserProvider } from './contexts/UserContext';
 
 import useToken from './hooks/useToken';
+import { TicketInfoProvider } from './contexts/TicketInfoContext';
 
 export default function App() {
   return (
@@ -27,6 +29,7 @@ export default function App() {
       <ToastContainer />
       <EventInfoProvider>
         <UserProvider>
+          <TicketInfoProvider>
           <Router>
             <Routes>
               <Route path="/" element={<Countdown />} />
@@ -50,6 +53,7 @@ export default function App() {
               </Route>
             </Routes>
           </Router>
+          </TicketInfoProvider>
         </UserProvider>
       </EventInfoProvider>
     </>

@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import styled from 'styled-components';
 
-export default function TicketInfo( { ticket } ) { 
+export default function TicketInfo( { ticket } ) {
     return (
       <>
         <TicketInfoDiv>

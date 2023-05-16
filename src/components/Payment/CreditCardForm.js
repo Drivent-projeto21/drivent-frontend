@@ -2,13 +2,15 @@
 import styled from 'styled-components';
 import Cards from 'react-credit-cards';
 import 'react-credit-cards/es/styles-compiled.css';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import InputMask from 'react-input-mask';
 import { validateCardData, verifyIssuer } from './validateCardData';
 import useProcessPayment from '../../hooks/api/useProcessPayment';
 import { toast } from 'react-toastify';
+import TicketInfoContext from '../../contexts/TicketInfoContext';
 
 export default function CreditCardForm( { setPaymentProcessed, ticket } ) {
+    const { refreshTicket } = useContext(TicketInfoContext);
     const [form, setForm] = useState({
         cvc: '',
         expiry: '',
@@ -45,6 +47,7 @@ export default function CreditCardForm( { setPaymentProcessed, ticket } ) {
         try {
             await processPayment(newData);
             setPaymentProcessed(true);
+            await refreshTicket();
             toast('Pagamento feito com sucesso!');
         } catch (error) {
             toast('Não foi possível finalizar o pagamento!');
