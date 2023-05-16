@@ -135,7 +135,6 @@ export default function Hotel() {
 
 const StyledTypography = styled(Typography)`
       margin-bottom: 20px !important;
-
       `;
 const StyledHotels = styled.div`
       display: flex;

@@ -1,21 +1,19 @@
 /* eslint-disable indent */
 import { useState } from 'react';
-import useTicket from '../../hooks/api/useTicket';
 import CreditCardForm from './CreditCardForm';
 import styled from 'styled-components';
 import TicketInfo from './TicketInfo';
 import { AiFillCheckCircle } from 'react-icons/ai';
 
-export default function TicketAndPayment() { 
-       const { ticket, ticketLoading } = useTicket();
-       const [paymentProcessed, setPaymentProcessed] = useState(false);
+export default function TicketAndPayment({ ticket }) { 
+    const [paymentProcessed, setPaymentProcessed] = useState(false);
 
     return (
       <>
       <SubTitle>Ingresso Escolhido</SubTitle>
       <TicketInfo ticket={ticket}/>
       <SubTitle>Pagamento</SubTitle>
-      {!ticketLoading ? 
+      { 
         ticket?.status === 'PAID' || paymentProcessed ? 
             <ProcessedPaymentDiv>
                 <Icon />
@@ -26,7 +24,7 @@ export default function TicketAndPayment() {
             </ProcessedPaymentDiv> 
         : 
             <CreditCardForm  setPaymentProcessed={setPaymentProcessed} ticket={ticket}/>
-        : ''}
+        }
       </>
     );
 }

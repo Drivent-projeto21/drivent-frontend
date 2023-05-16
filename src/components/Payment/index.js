@@ -2,27 +2,26 @@
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import getEnrollment from '../../hooks/api/useEnrollment';
-import UserWithoutEnrollment from './UserWithoutEnrollment';
-import useTicket from '../../hooks/api/useTicket';
 import TickestType from './TicketsType';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import TicketAndPayment from './TicketAndPayment';
+import TicketInfoContext from '../../contexts/TicketInfoContext';
+import Generic from '../Activities/Generic';
 
 export default function Payment() {
   const { enrollment } = getEnrollment();
-  const { ticket, ticketLoading } = useTicket();
   const [ticketReserved, setTicketReserved] = useState(false);
+  const { ticketInfo } = useContext(TicketInfoContext);
+  
   return (
     <>
       <StyledTypography variant="h4">Ingresso e pagamento</StyledTypography>
       <MainScr>
         {enrollment ? 
-        ticketReserved || (ticket && !ticketLoading) ? <TicketAndPayment /> : (
+        ticketReserved || (ticketInfo) ? <TicketAndPayment ticket={ticketInfo} /> : (
           <TickestType setTicketReserved={setTicketReserved}/>
         ) : (
-          <NotEnrollScr>
-            <UserWithoutEnrollment />
-          </NotEnrollScr>
+          <Generic>Você precisa completar sua inscrição antes de prosseguir pra escolha de ingresso</Generic>
         )}
       </MainScr>
     </>
