@@ -13,24 +13,9 @@ dayjs.updateLocale('en', {
   ]
 });
 
-function getEventDays(startsAt, endsAt) {
-    const startDate = new Date(startsAt);
-    const endDate = new Date(endsAt);
-    const days = [];
-
-    while (startDate <= endDate) {
-        const formattedDate = dayjs(startDate).format('dddd, DD/MM');
-        days.push(formattedDate);
-    
-        startDate.setDate(startDate.getDate() + 1);
-      }
-
-  return days;
-}
-
 export default function ActivitiesPerDay() {
-    const { eventInfo } = useContext(EventInfoContext);
-    const days = getEventDays(eventInfo.startsAt, eventInfo.endsAt);
+    //const { eventInfo } = useContext(EventInfoContext);
+    const days = ['Terça-feira, 16/05', 'Quarta-feira, 17/05', 'Quinta-feira, 18/05'];
     const [chosenDay, setChosenDay] = useState(null);
 
     function filterByDay(day) {
