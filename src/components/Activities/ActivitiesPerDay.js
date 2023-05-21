@@ -16,14 +16,18 @@ dayjs.updateLocale('en', {
 });
 
 export default function ActivitiesPerDay() {
-    const { activities } = useActivities();
+    const { getActivities } = useActivities();
+    const [activities, setActivities] = useState([]);
     const [activitiesDays, setActivitiesDays]= useState([]);
     const [chosenDay, setChosenDay] = useState(null);
     const { venues } = useVenue();
     const [filteredActivities, setFilteredActivities] = useState([]);
 
-    useEffect(() => {
-        if (activities) {
+    useEffect( async() => {
+        const activities = await getActivities();
+
+        if (activities.length > 0) {
+            setActivities(activities);
             const uniqueDatesSet = new Set();
             activities.forEach(activity => {
                 const startDate = dayjs(activity.startsAt).format('YYYY-MM-DD');
@@ -31,7 +35,7 @@ export default function ActivitiesPerDay() {
             });
             setActivitiesDays(Array.from(uniqueDatesSet));             
         }
-    }, [activities]);
+    }, [chosenDay]);
 
     function filterByDay(day) {
         setChosenDay(day);
@@ -54,7 +58,8 @@ export default function ActivitiesPerDay() {
                 </ButtonDiv>
                 {(chosenDay && filteredActivities.length > 0 && venues) && 
                     <VenueContainer>
-                        {venues?.map((venue, index) => <VenueDiv key={'venue' + index} venue={venue} activities={filteredActivities}/>)}
+                        {venues?.map((venue, index) =>
+                         <VenueDiv key={'venue' + index} venue={venue} activities={filteredActivities}/>)}
                     </VenueContainer>
                 }
             </>

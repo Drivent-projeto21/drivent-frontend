@@ -8,11 +8,13 @@ import styled from 'styled-components';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import useSaveSubscription from '../../hooks/api/useSaveSubscription';
 dayjs.extend(duration);
 
 export default function ActivityCard({ activity }) {
     const [noVacancies, setNoVacancies] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const { saveSubscription } = useSaveSubscription();
     const diff = (dayjs(activity.endsAt).diff(dayjs(activity.startsAt), 'minute') / 60);
 
     useEffect(() => {
@@ -20,14 +22,22 @@ export default function ActivityCard({ activity }) {
         if (activity.Subscriptions.length > 0) setIsSubscribed(true);
     }, []);
 
-    function subscribe() {
+    async function subscribe() {
         const endsAt = dayjs(activity.endsAt);
         if (endsAt.isBefore(dayjs())) {
             return toast.error('Essa atividade já foi encerrada, escolha outra!', { containerId: 'error' });
         }
         
         const body = { activityId: activity.id };
-        console.log(body);
+        try {
+            await saveSubscription(body);
+            toast('Inscrito com sucesso!');
+            setIsSubscribed(true);
+        } catch (error) {
+            if (error.response.status === 409) 
+            return toast.error('Você já está inscrito em outra atividade que ocorre nesse horário!', { containerId: 'error' });
+            toast('Não foi possível finalizar sua inscrição na atividade!');
+        }
     }
 
     return (
