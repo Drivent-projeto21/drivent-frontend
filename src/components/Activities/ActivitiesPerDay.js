@@ -2,8 +2,10 @@
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import Typography from '@material-ui/core/Typography';
-import EventInfoContext from '../../contexts/EventInfoContext';
-import { useContext, useState } from 'react';
+import { useEffect, useState } from 'react';
+import useActivities from '../../hooks/api/useActivity';
+import useVenue from '../../hooks/api/useVenue';
+import VenueDiv from './VenueDiv';
 
 const updateLocale = require('dayjs/plugin/updateLocale');
 dayjs.extend(updateLocale);
@@ -14,14 +16,31 @@ dayjs.updateLocale('en', {
 });
 
 export default function ActivitiesPerDay() {
-    //const { eventInfo } = useContext(EventInfoContext);
-    const days = ['Terça-feira, 16/05', 'Quarta-feira, 17/05', 'Quinta-feira, 18/05'];
+    const { getActivities } = useActivities();
+    const [activities, setActivities] = useState([]);
+    const [activitiesDays, setActivitiesDays]= useState([]);
     const [chosenDay, setChosenDay] = useState(null);
+    const { venues } = useVenue();
+    const [filteredActivities, setFilteredActivities] = useState([]);
+
+    useEffect( async() => {
+        const activities = await getActivities();
+
+        if (activities.length > 0) {
+            setActivities(activities);
+            const uniqueDatesSet = new Set();
+            activities.forEach(activity => {
+                const startDate = dayjs(activity.startsAt).format('YYYY-MM-DD');
+                uniqueDatesSet.add(startDate);
+            });
+            setActivitiesDays(Array.from(uniqueDatesSet));             
+        }
+    }, [chosenDay]);
 
     function filterByDay(day) {
         setChosenDay(day);
-        const newDate = dayjs(day.substring(day.length - 5), 'DD/MM');
-        console.log(newDate.format('YYYY-DD-MM'));
+        const filtered = activities.filter((e) => dayjs(e.startsAt).format('YYYY-MM-DD') === day);
+        setFilteredActivities(filtered);
     }
     
     return (
@@ -29,10 +48,20 @@ export default function ActivitiesPerDay() {
                 {chosenDay ? 
                 '' : <StyledTypography variant="colorTextSecondary">Primeiro, filtre pelo dia do evento:</StyledTypography>}
                 <ButtonDiv>
-                    {days.map((day, index) => 
-                        <ChooseDayButton onClick={() => filterByDay(day)} key={index} chosenDay={chosenDay} day={day}>{day}</ChooseDayButton>
-                    )}
+                    {activitiesDays.length > 0 &&
+                        activitiesDays.sort((date1, date2) => new Date(date1) - new Date (date2)).map((day, index) =>
+                        <ChooseDayButton onClick={() => filterByDay(day)} key={index} chosenDay={chosenDay} day={day}>
+                            {dayjs(day).format('dddd, DD/MM')}
+                        </ChooseDayButton>
+                        )
+                    }
                 </ButtonDiv>
+                {(chosenDay && filteredActivities.length > 0 && venues) && 
+                    <VenueContainer>
+                        {venues?.map((venue, index) =>
+                         <VenueDiv key={'venue' + index} venue={venue} activities={filteredActivities}/>)}
+                    </VenueContainer>
+                }
             </>
         );
 }
@@ -46,10 +75,12 @@ const ButtonDiv = styled.div`
     display:flex;
     column-gap: 17px;
     margin-top: 35px;
+    flex-wrap: wrap;
 `;
 
 const ChooseDayButton = styled.div`
-    width: 131px;
+    min-width: 131px;
+    padding: 0px 5px;
     height: 37px;
 
     background: ${({ day, chosenDay }) => day === chosenDay ? '#FFD37D' : '#E0E0E0'};
@@ -69,4 +100,10 @@ const ChooseDayButton = styled.div`
     &:hover {
         cursor: pointer;
     }
+`;
+
+const VenueContainer = styled.div`
+    display:flex;
+    width:100%;
+    margin-top: 60px;
 `;
